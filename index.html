@@ -239,6 +239,55 @@
       margin-left: 5px;
       font-weight: 500;
     }
+
+    /* Beer celebration */
+    #beer-overlay {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      overflow: hidden;
+    }
+
+    .beer-emoji {
+      position: absolute;
+      font-size: 2rem;
+      animation: beerFall 1.4s ease-in forwards;
+      user-select: none;
+    }
+
+    @keyframes beerFall {
+      0%   { transform: translateY(-60px) rotate(0deg); opacity: 1; }
+      80%  { opacity: 1; }
+      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+    }
+
+    .cheer-toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.5);
+      background: #fff;
+      border: 2px solid #e8e8e4;
+      border-radius: 14px;
+      padding: 18px 32px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      z-index: 10000;
+      pointer-events: none;
+      animation: toastPop 1.8s ease forwards;
+      white-space: nowrap;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    }
+
+    @keyframes toastPop {
+      0%   { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+      20%  { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+      35%  { transform: translate(-50%, -50%) scale(1);   opacity: 1; }
+      75%  { transform: translate(-50%, -50%) scale(1);   opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(0.9); opacity: 0; }
+    }
   </style>
 </head>
 <body>
@@ -248,6 +297,7 @@
   <p>Daniel & Simcha</p>
 </header>
 
+<div id="beer-overlay"></div>
 <div class="container">
 
   <!-- Balance -->
@@ -278,7 +328,7 @@
     </div>
     <div class="form-row">
       <div>
-        <label>Amount (₪)</label>
+        <label>Amount (€)</label>
         <input type="number" id="amount" placeholder="0" min="0" step="0.01" />
       </div>
       <div>
@@ -331,7 +381,7 @@
   }
 
   function formatAmount(n) {
-    return '₪' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return '€' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
 
   function calcBalance(expenses) {
@@ -429,7 +479,34 @@
     document.getElementById('amount').value = '';
     document.getElementById('date').valueAsDate = new Date();
 
+    if (/beer/i.test(desc)) celebrateBeer();
+
     render();
+  }
+
+  function celebrateBeer() {
+    const overlay = document.getElementById('beer-overlay');
+    const emojis = ['🍺','🍻','🍺','🎉','🍺','🥂','🍺','🍻'];
+    const count = 28;
+
+    for (let i = 0; i < count; i++) {
+      setTimeout(() => {
+        const el = document.createElement('span');
+        el.className = 'beer-emoji';
+        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.animationDuration = (1.1 + Math.random() * 0.8) + 's';
+        el.style.fontSize = (1.4 + Math.random() * 1.4) + 'rem';
+        overlay.appendChild(el);
+        el.addEventListener('animationend', () => el.remove());
+      }, i * 60);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'cheer-toast';
+    toast.textContent = '🍺 Cheers! 🍻';
+    document.body.appendChild(toast);
+    toast.addEventListener('animationend', () => toast.remove());
   }
 
   function deleteExpense(i) {
